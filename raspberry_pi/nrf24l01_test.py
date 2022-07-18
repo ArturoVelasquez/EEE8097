@@ -40,7 +40,7 @@ try:
 
                 # If the length of the message is 9 bytes and the first byte is 0x01, then we try to interpret the bytes
                 # sent as an example message holding a temperature and humidity sent from the "simple-sender.py" program.
-                if len(payload) == 9 and payload[0] == 0x01:
+                if len(payload) == 32 and payload[0] == 0x01:
                     values = struct.unpack("<Bff", payload)
                     print(f'Protocol: {values[0]}, temperature: {values[1]}, humidity: {values[2]}')
                 

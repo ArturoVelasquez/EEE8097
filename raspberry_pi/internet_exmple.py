@@ -44,7 +44,7 @@ if __name__ == "__main__":
     # Create NRF24L01 communication object with a fixed payload size of 9 bytes.
     # PLEASE NOTE: payload_size=9 sets a default payload size for all pipes being opened.
     # PLEASE NOTE: PA level is set to MIN, because test sender/receivers are often close to each other, and then MIN works better.
-    nrf = NRF24(pi, ce=25, payload_size=9, channel=100, data_rate=RF24_DATA_RATE.RATE_250KBPS, pa_level=RF24_PA.MIN)
+    nrf = NRF24(pi, ce=25, payload_size=32, channel=100, data_rate=RF24_DATA_RATE.RATE_250KBPS, pa_level=RF24_PA.MIN)
     nrf.set_address_bytes(len(address))
 
     # Listen on the address specified as parameter
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
                 # If the length of the message is 9 bytes and the first byte is 0x01, then we try to interpret the bytes
                 # sent as an example message holding a temperature and humidity sent from the "simple-sender.py" program.
-                if len(payload) == 9 and payload[0] == 0x01:
+                if len(payload) == 32 and payload[0] == 0x01:
                     values = struct.unpack("<Bff", payload)
                     print(f'Protocol: {values[0]}, temperature: {values[1]}, humidity: {values[2]}')
                 
