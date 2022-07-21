@@ -5,24 +5,24 @@ import sys
 import time
 import traceback
 
-from nrf24 import *
 import pigpio
+from nrf24 import *
 
 
 #
 # A simple NRF24L receiver that connects to a PIGPIO instance on a hostname and port, default "localhost" and 8888, and
-# starts receiving data with a fixed payload size of 9 bytes on the address specified.  
-# Use the companion program "fixed-sender.py" to send data to it from a different Raspberry Pi.
+# starts receiving data on the address specified.  Use the companion program "simple-sender.py" to send data to it from
+# a different Raspberry Pi.
 #
 if __name__ == "__main__":
 
     print("Python NRF24 Simple Receiver Example.")
     
     # Parse command line argument.
-    parser = argparse.ArgumentParser(prog="fixed-receiver.py", description="Simple NRF24 receiver with fixed payload size.")
+    parser = argparse.ArgumentParser(prog="simple-receiver.py", description="Simple NRF24 Receiver Example.")
     parser.add_argument('-n', '--hostname', type=str, default='localhost', help="Hostname for the Raspberry running the pigpio daemon.")
     parser.add_argument('-p', '--port', type=int, default=8888, help="Port number of the pigpio daemon.")
-    parser.add_argument('address', type=str, nargs='?', default='1SNSR', help="Address to listen to (3 to 5 ASCII characters).")
+    parser.add_argument('address', type=str, nargs='?', default='1SNSR', help="Address to listen to (3 to 5 ASCII characters)")
 
     args = parser.parse_args()
     hostname = args.hostname
@@ -39,12 +39,11 @@ if __name__ == "__main__":
     pi = pigpio.pi(hostname, port)
     if not pi.connected:
         print("Not connected to Raspberry Pi ... goodbye.")
-        exit()
+        sys.exit()
 
-    # Create NRF24L01 communication object with a fixed payload size of 9 bytes.
-    # PLEASE NOTE: payload_size=9 sets a default payload size for all pipes being opened.
+    # Create NRF24 object.
     # PLEASE NOTE: PA level is set to MIN, because test sender/receivers are often close to each other, and then MIN works better.
-    nrf = NRF24(pi, ce=25, payload_size=32, channel=100, data_rate=RF24_DATA_RATE.RATE_250KBPS, pa_level=RF24_PA.MIN)
+    nrf = NRF24(pi, ce=8, payload_size=RF24_PAYLOAD.DYNAMIC, channel=100, data_rate=RF24_DATA_RATE.RATE_250KBPS, pa_level=RF24_PA.MIN)
     nrf.set_address_bytes(len(address))
 
     # Listen on the address specified as parameter
@@ -55,8 +54,8 @@ if __name__ == "__main__":
 
     # Enter a loop receiving data on the address specified.
     try:
-        count = 0
         print(f'Receive from {address}')
+        count = 0
         while True:
 
             # As long as data is ready for processing, process it.
@@ -79,7 +78,7 @@ if __name__ == "__main__":
 
                 # If the length of the message is 9 bytes and the first byte is 0x01, then we try to interpret the bytes
                 # sent as an example message holding a temperature and humidity sent from the "simple-sender.py" program.
-                if len(payload) == 32 and payload[0] == 0x01:
+                if len(payload) == 9 and payload[0] == 0x01:
                     values = struct.unpack("<Bff", payload)
                     print(f'Protocol: {values[0]}, temperature: {values[1]}, humidity: {values[2]}')
                 
