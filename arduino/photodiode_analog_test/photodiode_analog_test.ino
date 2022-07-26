@@ -1,4 +1,8 @@
-
+/*
+ * for 5V input:
+ * soil moisture 180-450
+ * light sensor 20-1020
+ */
 #define PIN_PHOTODIODE A1
 
 int light_intensity = 0;
