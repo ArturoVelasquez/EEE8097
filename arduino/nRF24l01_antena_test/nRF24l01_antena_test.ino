@@ -1,4 +1,4 @@
-/* 
+  /* 
  *  This sketch is ment to be use for testing the nrf24l01+ antena is working
  *  pin convetion in arduino uno is: 
  *  clk  green  13
@@ -30,7 +30,7 @@
 
 void loop() {
   connected();
-  delay(5000);
+  delay(1000);
 
 }
 

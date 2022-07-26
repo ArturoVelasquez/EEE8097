@@ -66,11 +66,22 @@ void setup() {
 }
 
 void loop() {
+  /*
+   * TODO: concatenar en un mensaje de 32 bits (tambien debe tener una referencia de el modulo)
+   * TODO: Enviar mensaje a SCADA
+   * TODO: Incluir el servomotor 
+   * TODO: Fuzzi controll para servo / en este punto puede ser on/off
+   */
   if(soil_ok){
     soil = map(analogRead(MOISTUREPIN),160,450,100,0);
+  }
+  if(light_ok){
     light = map(analogRead(PHOTODIODEPIN),0,1023,100,0);
+  }
+  if(temperature_ok){
     humidity =dht.readHumidity();
     temperature=dht.readTemperature();
+  }
     Serial.print("soil: ");
     Serial.println(soil);
     Serial.print("light: ");
@@ -80,7 +91,6 @@ void loop() {
     Serial.println("temperature: ");
     Serial.println(temperature);
     delay(5000);
-  }
 
 }
 
@@ -133,6 +143,7 @@ bool check_digital(){
   if (isnan(dht.readHumidity()) || isnan(dht.readTemperature())) {
     Serial.println("TEMPERATURE & HUMDITY Sensor not conected.");
     Serial.println("Reset the system to add sensor and check again");
+    return(false);
   }
   return(true);
 }
