@@ -13,6 +13,10 @@
  *  Soil moisture pin A2 
  *  
  *  Actuator (Servo motor) is to be connected to pin 6
+ *  
+ *  In the comunication the firts 2 bytes  are the module identifier.
+ *  This can be the combination of any two bytes. 
+ *  This will identify the module in the database later. (Including the type of module).
  */
  
  #include <SPI.h>
@@ -28,8 +32,12 @@
  #define DHTPIN 7
  #define DHTTYPE DHT22   // DHT 22  (AM2302)
  #define SERVOPIN 6
+
  
+ const byte moduleNumber[2]= {0,0};
  const byte nrf_address[6] = "00042";
+ char dataToSend[32];
+ 
  RF24 antena(CEPIN,CSNPIN);
  
  bool soil_ok = 0;
@@ -40,36 +48,44 @@
  int light = 0;
  float humidity = 0;
  float temperature =0;
- 
-
  DHT dht(DHTPIN, DHTTYPE);
+
+ Servo waterValve;
  
 void setup() {
-  Serial.begin(9600);
+  use_serial();
   Serial.println("Starting module :");
   delay(1000);
+  
   antena.begin();
   antena.setDataRate( RF24_250KBPS );
   antena.setPALevel(RF24_PA_MAX );
-  //connected();
+  connected();
   delay(1000);
-  pinMode(PHOTODIODEPIN, INPUT_PULLUP);
+  
   pinMode(MOISTUREPIN, INPUT);
-  dht.begin();
   soil_ok = check_analog(MOISTUREPIN);
   delay(5000);
+  
+  pinMode(PHOTODIODEPIN, INPUT_PULLUP);
   light_ok = check_analog(PHOTODIODEPIN);
   delay(5000);
+  
+  dht.begin();
   temperature_ok=check_digital();
+  delay(1000);
+  
+  waterValve.attach(SERVOPIN);
+  Serial.print("Valve PWM control attached to pin: ");
+  Serial.print(SERVOPIN);
+  Serial.println(". Make sure actuator is in the wright pin.");
 
- 
 }
 
 void loop() {
   /*
-   * TODO: concatenar en un mensaje de 32 bits (tambien debe tener una referencia de el modulo)
+   * TODO: concatenar en un mensaje de 32 bits convertir multiples bytes a char y de vuelta. se pueden enviar bytes en ves de strings?
    * TODO: Enviar mensaje a SCADA
-   * TODO: Incluir el servomotor 
    * TODO: Fuzzi controll para servo / en este punto puede ser on/off
    */
   if(soil_ok){
@@ -82,16 +98,17 @@ void loop() {
     humidity =dht.readHumidity();
     temperature=dht.readTemperature();
   }
-    Serial.print("soil: ");
-    Serial.println(soil);
-    Serial.print("light: ");
-    Serial.println(light);
-    Serial.println("humidity: ");
-    Serial.println(humidity);
-    Serial.println("temperature: ");
-    Serial.println(temperature);
-    delay(5000);
-
+  water_controll();
+  
+  Serial.print("soil: ");
+  Serial.println(soil);
+  Serial.print("light: ");
+  Serial.println(light);
+  Serial.println("humidity: ");
+  Serial.println(humidity);
+  Serial.println("temperature: ");
+  Serial.println(temperature);
+  delay(5000);
 }
 
 void connected(){
@@ -147,4 +164,38 @@ bool check_digital(){
   }
   return(true);
 }
-  
+
+void use_serial(){
+  String confirmation="confirmation";
+  Serial.begin(9600);
+  Serial.println("Are you setting up in a computer? press any key followed by enter");
+  delay(7000);
+  if(Serial.available()>0){
+    String confirmation = Serial.readString();
+  }
+  if(confirmation.equals("confirmation")){
+      Serial.end();
+  }
+}
+
+void water_controll(){
+  int decide = (100-soil)*7+temperature*2+(100-humidity)+light;
+  decide=map(decide, 0,1000,0,4);
+  switch(decide){
+    case 0:
+      waterValve.write(0);
+      break;
+    case 1:
+      waterValve.write(45);
+      break;
+    case 2:
+      waterValve.write(90);
+      break;
+    case 3:
+      waterValve.write(123);
+      break;
+    case 4:
+      waterValve.write(180);  
+      break;
+  }
+}
