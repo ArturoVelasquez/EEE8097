@@ -1,9 +1,9 @@
 /*
  * for 5V input:
- * soil moisture 160(sumerged in water) - 450 (dry)
+ * soil moisture 165(sumerged in water) - 455 (dry)
  * light intesity 1000(no light)-20(light)
  */
-#define PIN_PHOTODIODE A1 
+//#define PIN_PHOTODIODE A1 
 #define PIN_PHOTODIODE A2
 
 int light_intensity = 0;

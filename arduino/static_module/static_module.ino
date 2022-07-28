@@ -8,7 +8,7 @@
  *  ce   orange pin 10
  *  
  *  Sensor are to be connected as follows
- *  DHT pin 6 
+ *  DHT pin 7 
  *  Photodiode sensor pin A1
  *  Soil moisture pin A2 
  *  
@@ -60,7 +60,7 @@ void setup() {
   antena.begin();
   antena.setDataRate( RF24_250KBPS );
   antena.setPALevel(RF24_PA_MAX );
-  connected();
+  //connected();
   delay(1000);
   
   pinMode(MOISTUREPIN, INPUT);
@@ -89,7 +89,7 @@ void loop() {
    * TODO: Fuzzi controll para servo / en este punto puede ser on/off
    */
   if(soil_ok){
-    soil = map(analogRead(MOISTUREPIN),160,450,100,0);
+    soil = map(analogRead(MOISTUREPIN),165,455,100,0);
   }
   if(light_ok){
     light = map(analogRead(PHOTODIODEPIN),0,1023,100,0);
@@ -98,15 +98,16 @@ void loop() {
     humidity =dht.readHumidity();
     temperature=dht.readTemperature();
   }
+  
   water_controll();
   
   Serial.print("soil: ");
   Serial.println(soil);
   Serial.print("light: ");
   Serial.println(light);
-  Serial.println("humidity: ");
+  Serial.print("humidity: ");
   Serial.println(humidity);
-  Serial.println("temperature: ");
+  Serial.print("temperature: ");
   Serial.println(temperature);
   delay(5000);
 }
@@ -171,9 +172,11 @@ void use_serial(){
   Serial.println("Are you setting up in a computer? press any key followed by enter");
   delay(7000);
   if(Serial.available()>0){
-    String confirmation = Serial.readString();
+    confirmation = Serial.readString();
+    Serial.println("Use of serial confirmed" );
   }
   if(confirmation.equals("confirmation")){
+      Serial.println("No further comunication will be provided");
       Serial.end();
   }
 }
@@ -184,17 +187,22 @@ void water_controll(){
   switch(decide){
     case 0:
       waterValve.write(0);
+      Serial.println("really wet: valve close!");
       break;
     case 1:
+      Serial.println("Somewhat wet: quarter open.");
       waterValve.write(45);
       break;
     case 2:
+      Serial.println("H2O is no harm: half open.");
       waterValve.write(90);
       break;
     case 3:
+      Serial.println("Starting to feel thirsty: three quarters open.");
       waterValve.write(123);
       break;
     case 4:
+      Serial.println("Im about to erode: fully open.");
       waterValve.write(180);  
       break;
   }
