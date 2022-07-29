@@ -33,10 +33,18 @@
  #define DHTTYPE DHT22   // DHT 22  (AM2302)
  #define SERVOPIN 6
 
- 
- const byte moduleNumber[2]= {0,0};
+ struct message {
+  byte module_number[2];
+  float temperature;
+  float humidity;
+  int soil;
+  int light;
+  int valve;
+  };
+
+ const byte module_number[2]= {0,0};
  const byte nrf_address[6] = "00042";
- char dataToSend[32];
+ char sensor_readings[32];
  
  RF24 antena(CEPIN,CSNPIN);
  
@@ -48,9 +56,21 @@
  int light = 0;
  float humidity = 0;
  float temperature =0;
- DHT dht(DHTPIN, DHTTYPE);
+ 
+ int soil_v = 0;
+ int light_v = 0;
+ float humidity_v = 0;
+ float temperature_v =0;
 
+ int measurement_count = 0;
+ 
+ DHT dht(DHTPIN, DHTTYPE);
+ 
  Servo waterValve;
+ int valve = 0;
+ int valve_v = 0;
+
+ message my_message{{module_number[0],module_number[1]},0.0,0.0,0,0,0};
  
 void setup() {
   use_serial();
@@ -60,6 +80,7 @@ void setup() {
   antena.begin();
   antena.setDataRate( RF24_250KBPS );
   antena.setPALevel(RF24_PA_MAX );
+  antena.stopListening();
   //connected();
   delay(1000);
   
@@ -89,17 +110,23 @@ void loop() {
    * TODO: Fuzzi controll para servo / en este punto puede ser on/off
    */
   if(soil_ok){
-    soil = map(analogRead(MOISTUREPIN),165,455,100,0);
+    soil += map(analogRead(MOISTUREPIN),165,455,100,0);
   }
   if(light_ok){
-    light = map(analogRead(PHOTODIODEPIN),0,1023,100,0);
+    light += map(analogRead(PHOTODIODEPIN),0,1023,100,0);
   }
   if(temperature_ok){
-    humidity =dht.readHumidity();
-    temperature=dht.readTemperature();
+    humidity +=dht.readHumidity();
+    temperature +=dht.readTemperature();
   }
+  measurement_count += 1;
   
   water_controll();
+
+  if(measurement_count > 30){
+    update_message();
+    send_message();
+  }
   
   Serial.print("soil: ");
   Serial.println(soil);
@@ -109,7 +136,7 @@ void loop() {
   Serial.println(humidity);
   Serial.print("temperature: ");
   Serial.println(temperature);
-  delay(5000);
+  delay(10000);
 }
 
 void connected(){
@@ -182,28 +209,66 @@ void use_serial(){
 }
 
 void water_controll(){
+  int valve_position;
   int decide = (100-soil)*7+temperature*2+(100-humidity)+light;
   decide=map(decide, 0,1000,0,4);
+  valve+=decide;
   switch(decide){
     case 0:
-      waterValve.write(0);
+      valve_position=0;
       Serial.println("really wet: valve close!");
       break;
     case 1:
       Serial.println("Somewhat wet: quarter open.");
-      waterValve.write(45);
+      valve_position=45;
       break;
     case 2:
       Serial.println("H2O is no harm: half open.");
-      waterValve.write(90);
+      valve_position=90;
       break;
     case 3:
       Serial.println("Starting to feel thirsty: three quarters open.");
-      waterValve.write(123);
+      valve_position=135;
       break;
     case 4:
       Serial.println("Im about to erode: fully open.");
-      waterValve.write(180);  
+      valve_position=180;  
       break;
+  }
+  waterValve.write(valve_position);  
+
+}
+
+void update_message(){
+  temperature_v = temperature/measurement_count;
+  humidity_v = humidity/measurement_count;
+  soil_v = (int) soil/measurement_count;
+  light_v = (int) light/measurement_count;
+  valve_v = (int) valve/measurement_count;
+  
+  my_message.temperature=temperature_v;
+  my_message.humidity=humidity_v;
+  my_message.light=light_v;
+  my_message.soil=soil_v;
+
+  humidity=0.0;
+  temperature=0.0;
+  soil=0;
+  light=0;
+  valve= 0;
+  measurement_count = 0;
+  
+}
+
+void send_message(){
+  //radio.stopListening();
+  //radio.write(&data,sizeof(data));
+  if (antena.write(&my_message, sizeof(my_message))) {
+    Serial.print("Message sent successfully. Retries="); 
+    Serial.println(antena.getARC());
+  }
+  else {
+    Serial.print("Message not sent. Retries=");
+    Serial.println(antena.getARC());
   }
 }
