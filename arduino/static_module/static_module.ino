@@ -27,6 +27,7 @@
 
  #define CEPIN 10
  #define CSNPIN 9
+ #define NRFCHANNEL 100
  #define PHOTODIODEPIN A1
  #define MOISTUREPIN A2
  #define DHTPIN 7
@@ -43,7 +44,7 @@
   };
 
  const byte module_number[2]= {0,0};
- const byte nrf_address[6] = "00042";
+ const byte nrf_address[6] = "R2RHO";
  char sensor_readings[32];
  
  RF24 antena(CEPIN,CSNPIN);
@@ -75,13 +76,13 @@
 void setup() {
   use_serial();
   Serial.println("Starting module :");
+  
   delay(1000);
   
   antena.begin();
-  antena.setDataRate( RF24_250KBPS );
-  antena.setPALevel(RF24_PA_MAX );
-  antena.stopListening();
-  //connected();
+  antena_connected();
+  antena_setup();
+
   delay(1000);
   
   pinMode(MOISTUREPIN, INPUT);
@@ -105,7 +106,6 @@ void setup() {
 
 void loop() {
   /*
-   * TODO: concatenar en un mensaje de 32 bits convertir multiples bytes a char y de vuelta. se pueden enviar bytes en ves de strings?
    * TODO: Enviar mensaje a SCADA
    * TODO: Fuzzi controll para servo / en este punto puede ser on/off
    */
@@ -139,7 +139,7 @@ void loop() {
   delay(10000);
 }
 
-void connected(){
+void antena_connected(){
   bool connectedToAntena;
   connectedToAntena=antena.isChipConnected();
   Serial.println("Cheking for transmitter:");
@@ -151,6 +151,17 @@ void connected(){
   if(connectedToAntena){
     Serial.println("nRF24l01+ working ok.");
   }  
+}
+
+void antena_setup(){
+  antena.enableDynamicPayloads();
+  antena.setDataRate(RF24_250KBPS);
+  antena.setPALevel(RF24_PA_MAX);
+  antena.setChannel(NRFCHANNEL);
+  antena.setDataRate(RF24_250KBPS);
+  antena.setCRCLength(RF24_CRC_16);
+  antena.openWritingPipe(nrf_address);
+  antena.stopListening();
 }
 
 bool check_analog(int pin){

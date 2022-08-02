@@ -18,7 +18,7 @@ nrf.show_registers()
 try:
     count = 0
     print(f'Receive from {address}')
-        while True:
+    while True:
 
             # As long as data is ready for processing, process it.
             while nrf.data_ready():
@@ -46,8 +46,8 @@ try:
                 
             # Sleep 100 ms.
             time.sleep(0.1)
-    except:
-        traceback.print_exc()
-        nrf.power_down()
-        pi.stop()
+except:
+    traceback.print_exc()
+    nrf.power_down()
+    pi.stop()
 
