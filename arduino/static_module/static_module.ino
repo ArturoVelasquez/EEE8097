@@ -33,8 +33,10 @@
  #define DHTPIN 7
  #define DHTTYPE DHT22   // DHT 22  (AM2302)
  #define SERVOPIN 6
-
+ #define MODULETYPE 0x01
+ 
  struct message {
+  byte module_type;
   byte module_number[2];
   float temperature;
   float humidity;
@@ -71,7 +73,7 @@
  int valve = 0;
  int valve_v = 0;
 
- message my_message{{module_number[0],module_number[1]},0.0,0.0,0,0,0};
+ message my_message{MODULETYPE,{module_number[0],module_number[1]},0.0,0.0,0,0,0};
  
 void setup() {
   use_serial();

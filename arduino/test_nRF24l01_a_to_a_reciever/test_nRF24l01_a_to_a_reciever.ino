@@ -7,7 +7,7 @@
 #define CE_PIN   10
 #define CSN_PIN  9
 
-const byte thisSlaveAddress[5] = {'R','x','A','A','A'};
+const byte thisSlaveAddress[5] = {'1','S','N','S','R'};
 
 /* addres can also be declare as so: 
  * const byte thisSlaveAddress[6] = "RxAAA" 
@@ -28,7 +28,8 @@ void setup() {
     Serial.println("Test Starting:");
     radio.begin();
     radio.setDataRate( RF24_250KBPS );
-    radio.setPALevel(RF24_PA_MIN);
+    radio.setPALevel(RF24_PA_MAX);
+    //radio.setChannel(100);
     radio.openReadingPipe(1, thisSlaveAddress);
     radio.startListening();
 }

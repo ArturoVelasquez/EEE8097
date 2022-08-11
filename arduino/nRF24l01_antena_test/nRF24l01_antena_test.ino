@@ -21,7 +21,7 @@
  
  void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Anthena test runing ...");
   antena.begin();
   antena.setDataRate( RF24_250KBPS );
