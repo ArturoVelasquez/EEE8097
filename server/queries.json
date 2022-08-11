@@ -1,0 +1,5 @@
+{
+    "mobile_data":"select m.nitrogen, m.phosphorus, m.potasium, m.latitude, m.longitude from measurements m inner join nodes n on n.id = m.node_id where n.mobile = true and m.time_taken between {} and {} order by m.time_taken desc;",
+    "static_data":"select distinct on (m.node_id) m.node_id, m.temperature, m.humidity, m.soil_moisture, m.light_intensity, m.valve_status, n.latitude, n.longitude from measurements m inner join nodes n on n.id = m.node_id where n.mobile = false and m.time_taken between {} and {}} order bym.node_id, time_taken desc ;",
+    "module_list":"select id, node_name from nodes whereactive = true;"
+}
