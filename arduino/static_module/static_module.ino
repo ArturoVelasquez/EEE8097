@@ -49,7 +49,7 @@
  const byte nrf_address[6] = "R2RHO";
  char sensor_readings[32];
  
- RF24 antena(CEPIN,CSNPIN);
+
  
  bool soil_ok = 0;
  bool light_ok =0;
@@ -72,7 +72,7 @@
  Servo waterValve;
  int valve = 0;
  int valve_v = 0;
-
+ RF24 antena(CEPIN,CSNPIN);
  message my_message{MODULETYPE,{module_number[0],module_number[1]},0.0,0.0,0,0,0};
  
 void setup() {
