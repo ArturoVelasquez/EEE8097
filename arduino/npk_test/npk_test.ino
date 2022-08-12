@@ -2,15 +2,14 @@
 #include <Wire.h>
 
  
-#define RE 8
-#define DE 7
-#define RO 2
-#define DI 3
+#define RE 5 //gray
+#define DE 4 //purple
+#define RO 2 //blue 
+#define DI 3 //green
  
 const byte NPKREQUEST[]= {0x01, 0x03, 0x00, 0x1e, 0x00, 0x03, 0x34, 0x0D};
-
-const byte NREQUEST[] = {0x01,0x03, 0x00, 0x1e, 0x00, 0x01, 0xb5, 0xcc};
-const byte PREQUEST[] = {0x01,0x03, 0x00, 0x1f, 0x00, 0x01, 0xe4, 0x0c};
+const byte NREQUEST[] = {0x01,0x03, 0x00, 0x1e, 0x00, 0x01, 0xe4, 0x0c};
+const byte PREQUEST[] = {0x01,0x03, 0x00, 0x1f, 0x00, 0x01, 0xb5, 0xcc};
 const byte KREQUEST[] = {0x01,0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};
 const byte CHECKRESPONSE[] = {0x01,0x03, 0x02};
  
@@ -21,13 +20,13 @@ int N,P,K;
 SoftwareSerial mod(RO,DI);
  
 void setup() {
-  Serial.begin(15200);
+  Serial.begin(115200);
   mod.begin(9600);
   pinMode(RE, OUTPUT);
   pinMode(DE, OUTPUT);
   
   delay(500);
-  Serial.println(" NPK Sensor");
+  Serial.println("NPK Sensor");
   Serial.print("Initializing");
   delay(3000);
 }
@@ -69,7 +68,7 @@ int nitrogen(){
     Serial.println(values[i],HEX);
     }
     Serial.println();
-    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[0] && CHECKRESPONSE[2]== values[0] ){
+    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[1] && CHECKRESPONSE[2]== values[2] ){
       Serial.println("Correct response format detected.");
       reading= int(values[3])+int(values[4]);
     }
@@ -95,7 +94,7 @@ int phosphorus(){
     Serial.println(values[i],HEX);
     }
     Serial.println();
-    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[0] && CHECKRESPONSE[2]== values[0] ){
+    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[1] && CHECKRESPONSE[2]== values[2] ){
       Serial.println("Correct response format detected.");
       reading= int(values[3])+int(values[4]);
     }
@@ -121,7 +120,7 @@ int potassium(){
     Serial.println(values[i],HEX);
     }
     Serial.println();
-    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[0] && CHECKRESPONSE[2]== values[0] ){
+    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[1] && CHECKRESPONSE[2]== values[2] ){
       Serial.println("Correct response format detected.");
       reading= int(values[3])+int(values[4]);
     }

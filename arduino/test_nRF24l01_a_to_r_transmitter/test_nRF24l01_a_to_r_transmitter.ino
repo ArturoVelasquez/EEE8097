@@ -33,8 +33,10 @@
  #define DHTPIN 7
  #define DHTTYPE DHT22   // DHT 22  (AM2302)
  #define SERVOPIN 6
-
+ #define MODULETYPE 0x01
+ 
  struct message {
+  byte module_type;
   byte module_number[2];
   float temperature;
   float humidity;
@@ -43,8 +45,8 @@
   int valve;
   };
 
- const byte module_number[2]= {0,0};
- const byte nrf_address[6] = "R2RHO";
+ const byte module_number[2]= {1,1};
+ const byte nrf_address[6] = "1SNSR";
  char sensor_readings[32];
  
  RF24 antena(CEPIN,CSNPIN);
@@ -61,7 +63,7 @@
  Servo waterValve;
  int valve_v = 0;
 
- message my_message{{module_number[0],module_number[1]},0.0,0.0,0,0,0};
+ message my_message{MODULETYPE,{module_number[0],module_number[1]},0.0,0.0,0,0,0};
  
 void setup() {
   Serial.begin(115200);
@@ -86,16 +88,6 @@ void loop() {
   
   update_message();
   send_message();
-
-  
-  Serial.print("soil: ");
-  Serial.println(soil_v);
-  Serial.print("light: ");
-  Serial.println(light_v);
-  Serial.print("humidity: ");
-  Serial.println(humidity_v);
-  Serial.print("temperature: ");
-  Serial.println(temperature_v);
   delay(5000);
 }
 
@@ -120,6 +112,7 @@ void antena_setup(){
   antena.setChannel(NRFCHANNEL);
   antena.setDataRate(RF24_250KBPS);
   antena.setCRCLength(RF24_CRC_16);
+  antena.setPayloadSize(32);
   antena.openWritingPipe(nrf_address);
   antena.stopListening();
 }
@@ -136,17 +129,28 @@ void update_message(){
   my_message.humidity=humidity_v;
   my_message.light=light_v;
   my_message.soil=soil_v;
+  my_message.valve=valve_v;
 
-  measurement_count +=1;
+  //measurement_count +=1;
   
 }
 
 void send_message(){
   //radio.stopListening();
   //radio.write(&data,sizeof(data));
+  Serial.print("mesage length: ");
+  Serial.println(sizeof(my_message));
   if (antena.write(&my_message, sizeof(my_message))) {
     Serial.print("Message sent successfully. Retries="); 
     Serial.println(antena.getARC());
+    Serial.print("soil: ");
+    Serial.println(soil_v);
+    Serial.print("light: ");
+    Serial.println(light_v);
+    Serial.print("humidity: ");
+    Serial.println(humidity_v);
+    Serial.print("temperature: ");
+    Serial.println(temperature_v);
   }
   else {
     Serial.print("Message not sent. Retries=");
