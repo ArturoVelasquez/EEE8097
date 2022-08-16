@@ -28,11 +28,13 @@
  #define CEPIN 10
  #define CSNPIN 9
  #define NRFCHANNEL 100
+ 
  #define PHOTODIODEPIN A1
  #define MOISTUREPIN A2
  #define DHTPIN 7
  #define DHTTYPE DHT22   // DHT 22  (AM2302)
  #define SERVOPIN 6
+ 
  #define MODULETYPE 0x01
  
  struct message {

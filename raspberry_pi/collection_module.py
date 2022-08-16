@@ -51,7 +51,7 @@ try:
                     typer= csv.writer(file)
                     typer.writerow([measured_time,values[0],values[1]+values[2],round(values[3],2),round(values[4],2),values[5],values[6],values[7],'','','','',''])
                     file.close()
-            if payload[0] ==0x02:
+            if payload[0] == 0x02:
                 values = struct.unpack("<BBBhhhff", payload)
                 print(f'Module number: {values[0]}, module type: {values[1:3]}, nitrogen: {values[5]},phosphorus: {values[6]}, potasium {values[7]}, latitude: {values[3]}, longitude: {values[4]}')
                 with open(filename, 'a', newline='') as file:

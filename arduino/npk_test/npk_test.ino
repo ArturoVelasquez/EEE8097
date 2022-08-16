@@ -32,7 +32,7 @@ void setup() {
 }
  
 void loop() {
-  N = nitrogen();
+  N = npk_read(NREQUEST,sizeof(NREQUEST));
   delay(250);
   P = phosphorus();
   delay(250);
@@ -126,6 +126,31 @@ int potassium(){
     }
     else{
       Serial.println("Incorrect reading");
+      reading = 9999;
+    }
+  }
+  return reading;
+}
+
+int npk_read(const byte request[8],int request_size){
+  int reading;
+  digitalWrite(DE,HIGH);
+  digitalWrite(RE,HIGH);
+  delay(10);
+  if(mod.write(request,request_size)==8){
+    digitalWrite(DE,LOW);
+    digitalWrite(RE,LOW);
+    for(byte i=0;i<request_size;i++){
+    values[i] = mod.read();
+    //Serial.println(values[i],HEX);
+    }
+    //Serial.println();
+    if(CHECKRESPONSE[0] == values[0] && CHECKRESPONSE[1]== values[1] && CHECKRESPONSE[2]== values[2] ){
+      //Serial.println("Correct response format detected.");
+      reading= int(values[3])+int(values[4]);
+    }
+    else{
+      //Serial.println("Incorrect reading");
       reading = 9999;
     }
   }

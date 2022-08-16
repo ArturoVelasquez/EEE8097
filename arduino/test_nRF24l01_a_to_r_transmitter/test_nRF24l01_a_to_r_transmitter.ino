@@ -22,17 +22,11 @@
  #include <SPI.h>
  #include <nRF24L01.h>
  #include <RF24.h>
- #include <DHT.h>
- #include <Servo.h>
+
 
  #define CEPIN 10
  #define CSNPIN 9
  #define NRFCHANNEL 100
- #define PHOTODIODEPIN A1
- #define MOISTUREPIN A2
- #define DHTPIN 7
- #define DHTTYPE DHT22   // DHT 22  (AM2302)
- #define SERVOPIN 6
  #define MODULETYPE 0x01
  
  struct message {
@@ -51,19 +45,14 @@
  
  RF24 antena(CEPIN,CSNPIN);
  
- int soil_v = 0;
- int light_v = 0;
- float humidity_v = 0;
- float temperature_v =0;
+ int soil_v = 77, light_v = 88;
+ float humidity_v = 99.99,temperature_v =11.11;
 
- int measurement_count = 0;
+ int measurement_count = 1;
  
- DHT dht(DHTPIN, DHTTYPE);
- 
- Servo waterValve;
  int valve_v = 0;
 
- message my_message{MODULETYPE,{module_number[0],module_number[1]},0.0,0.0,0,0,0};
+ message my_message{MODULETYPE,{module_number[0],module_number[1]},temperature_v,humidity_v,soil_v,light_v,valve_v};
  
 void setup() {
   Serial.begin(115200);
@@ -76,17 +65,9 @@ void setup() {
   antena_setup();
 
   delay(1000);
-  
-  soil_v=70;
-  light_v=50;
-  temperature_v=18.55;
-  humidity_v=55.23;
 }
 
 void loop() {
-
-  
-  update_message();
   send_message();
   delay(5000);
 }
@@ -121,17 +102,20 @@ void antena_setup(){
 void update_message(){
   temperature_v = temperature_v + measurement_count;
   humidity_v = humidity_v + measurement_count;
-  soil_v = (int) soil_v + measurement_count;
-  light_v = (int) light_v + measurement_count;
-  valve_v = (int) valve_v + measurement_count;
+  soil_v = soil_v + measurement_count;
+  light_v = light_v + measurement_count;
   
+  if(valve_v >=4){
+    valve_v =0;
+  }
+  else{
+    valve_v=valve_v + measurement_count;
+  }
   my_message.temperature=temperature_v;
   my_message.humidity=humidity_v;
   my_message.light=light_v;
   my_message.soil=soil_v;
   my_message.valve=valve_v;
-
-  //measurement_count +=1;
   
 }
 
@@ -151,6 +135,7 @@ void send_message(){
     Serial.println(humidity_v);
     Serial.print("temperature: ");
     Serial.println(temperature_v);
+    update_message();
   }
   else {
     Serial.print("Message not sent. Retries=");
