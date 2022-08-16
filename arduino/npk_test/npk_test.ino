@@ -33,6 +33,7 @@ void setup() {
  
 void loop() {
   N = npk_read(NREQUEST,sizeof(NREQUEST));
+  //N = nitrogen();
   delay(250);
   P = phosphorus();
   delay(250);
