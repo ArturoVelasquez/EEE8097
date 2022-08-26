@@ -114,8 +114,8 @@ def plot_mobile(data,nitrogen=True,phosphorus=True,potasium=True,name='nutrients
     
     plt.legend(handles=[small,medium,large],frameon=True, framealpha=1, borderpad=1.2,labelspacing=1, loc='upper left',title="Nutrient density mg/kg");
 
-    plt.show()
     plt.savefig(f'{name}.png')
+
 
 #this method generates the plots for the ambient nutrientes
 def plot_static(data, ht=True,ls=True,v=True,name='values'):
@@ -178,5 +178,10 @@ def plot_static(data, ht=True,ls=True,v=True,name='values'):
     ax.yaxis.set_label_position("right")
     plt.ylabel("latitude")
     
-    plt.show()
-    plt.savefig(F'{name}.png')
+    plt.savefig(f'{name}.png')
+
+    
+
+if __name__== "__main__":
+    data=generate_test_data()
+    plot_static(data[0],True,False,False)
